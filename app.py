@@ -1,14 +1,28 @@
 import qrcode
+from flask import Flask, request, send_file
+from generate_qr import generate_qr_code
 
-def generate_qr_code(text, filename):
-    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=12, border=4)
-    qr.add_data(text)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    img.save(filename)
+app = Flask(__name__)
 
-text = "https://yukie.site/portofolio"
-filename = "yukie_qr_link.png"
+@app.route('/')
+def index():
+    return "welcome, to generate qr access endpoint: POST /qrcode"
 
-generate_qr_code(text, filename)
-print(f"File saved at {filename}")
+@app.route('/qrcode', methods=["POST"])
+def qr_code():
+    par = request.json
+    print(par)
+
+    try:
+        filename = par['filename']
+        text_qr = par['body']
+
+        result_file , _ = generate_qr_code(text_qr, filename)
+
+        return send_file(result_file)
+    except Exception as e:
+        print(e)
+        return {'error': str(e)}
+
+if __name__ == "__main__":
+    app.run()
