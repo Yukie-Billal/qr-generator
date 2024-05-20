@@ -20,7 +20,9 @@ def qr_code():
 
         result_file , _ = generate_qr_code(text_qr, filename)
 
-        return send_file(result_file)
+        return {
+            "result_file": result_file
+        }
     except Exception as e:
         print(e)
         return {'error': str(e)}
@@ -37,10 +39,28 @@ def qr_code_matrix():
 
         filename = f"qr_code-{datetime.now().strftime('%d%m%Y')}.png"
 
-        image = matrix_to_image(qr_code_matrix)
-        image.save(f'public/{filename}')
+        matrix_to_image(qr_code_matrix)
 
-        return send_file(), 200
+        return {"message": "success"}, 200
+    except Exception as e:
+        print(e)
+        return {'message': 'Internal server error'}, 500
+    
+
+@app.route('/barcode', methods=["POST"])
+def barcode_simple():
+    par = request.values
+
+    try:
+        from utils.binary_to_barcode import generate_simple_barcode
+        print(par)
+
+        filename = f"qr_code-{datetime.now().strftime('%d%m%Y')}.png"
+
+        barcode_data = '101010101011110010100101010101010101010101011110010101010'  # Example binary string
+
+        generate_simple_barcode(barcode_data)
+        return {"message": "success"}, 200
     except Exception as e:
         print(e)
         return {'message': 'Internal server error'}, 500
